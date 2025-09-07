@@ -15,9 +15,14 @@ module.exports = {
                 .setMaxValues(1) // can only pick one
                 .addOptions([
                     {
-                        label: "RoutineBuddy",
-                        description: "Sets up reminders for your morning/nightly skincare routine",
-                        value: "routine",
+                        label: "RoutineBuddy (Morning)",
+                        description: "Sets up reminders for your morning skincare routine",
+                        value: "routine_morning",
+                    },
+                    {
+                        label: "RoutineBuddy (Night)",
+                        description: "Sets up reminders for your nighttime skincare routine",
+                        value: "routine_night",
                     },
                     {
                         label: "SunscreenBuddy",
