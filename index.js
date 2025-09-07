@@ -47,4 +47,11 @@ for (const file of eventFiles) {
 	}
 }
 
+// schedule message
+const schedule = require('node-schedule');
+const job = schedule.scheduleJob('30 * * * *', function(){
+  console.log('test');
+});
+
+
 client.login(token);

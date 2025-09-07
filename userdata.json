@@ -1,0 +1,16 @@
+{
+  "zip": "06520",
+  "skincare_options": [
+    "sunscreen",
+    "retinol",
+    "cleanser",
+    "salicylic acid"
+  ],
+  "morning": [],
+  "night": [
+    "retinol",
+    "cleanser",
+    "salicylic acid"
+  ],
+  "morning_reminder": "08:00 AM"
+}
