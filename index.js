@@ -47,11 +47,14 @@ for (const file of eventFiles) {
 	}
 }
 
-// schedule message
-const schedule = require('node-schedule');
-const job = schedule.scheduleJob('30 * * * * *', function(){
-  console.log('test');
-});
+// Initialize skincare scheduler
+const SkincareScheduler = require('./utils/scheduler');
 
+// Wait for client to be ready before initializing scheduler
+client.once('ready', async () => {
+  console.log('Client is ready, initializing scheduler...');
+  client.scheduler = new SkincareScheduler(client);
+  await client.scheduler.initializeSchedules();
+});
 
 client.login(token);
