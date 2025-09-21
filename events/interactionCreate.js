@@ -81,7 +81,7 @@ function loadRoutineFromFile(period) {
 }
 
 // Save routineSelections[period] into file
-function saveRoutineToFile(period, selected) {
+async function saveRoutineToFile(period, selected, client = null) {
     let json = {};
     if (fs.existsSync(filePath)) {
         try {
@@ -95,8 +95,24 @@ function saveRoutineToFile(period, selected) {
     }
 	console.log(selected)
     json[period] = Array.from(selected);
-    fs.writeFile(filePath, JSON.stringify(json, null, 2), (err) => {
-        if (err) console.error("Error writing userdata.json:", err);
+    
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, JSON.stringify(json, null, 2), async (err) => {
+            if (err) {
+                console.error("Error writing userdata.json:", err);
+                reject(err);
+            } else {
+                // Update schedules when routine data changes
+                if (client && client.scheduler) {
+                    try {
+                        await client.scheduler.updateSchedules();
+                    } catch (schedErr) {
+                        console.error("Error updating schedules:", schedErr);
+                    }
+                }
+                resolve();
+            }
+        });
     });
 }
 
@@ -133,14 +149,15 @@ module.exports = {
             const selected = routineSelections[period];
 
             if (action === "save") {
-                saveRoutineToFile(period, selected);
-                // await interaction.reply({
-                //     content: `✅ Your **${period} skincare routine** has been saved!`,
-                //     ephemeral: true,
-                // });
+                try {
+                    await saveRoutineToFile(period, selected, interaction.client);
+                } catch (err) {
+                    console.error("Error saving routine:", err);
+                }
+                
 				const modal = new ModalBuilder()
 					.setCustomId(`reminder_time_${period}`)
-					.setTitle("Morning Skincare Reminder")
+					.setTitle(`${period.charAt(0).toUpperCase() + period.slice(1)} Skincare Reminder`)
 				const input = new TextInputBuilder()
 					.setCustomId("time")
 					.setLabel("Reminder time (HH:MM)")
@@ -248,9 +265,16 @@ module.exports = {
 					json.night_reminder = interaction.fields.getTextInputValue("time")
 				}
 				fs.writeFileSync(filePath, JSON.stringify(json, null, 2));
-				await interaction.reply(`Sucessfully saved ${period} reminder time`)
+				
+				// Update schedules when user data changes
+				if (interaction.client.scheduler) {
+					await interaction.client.scheduler.updateSchedules();
+				}
+				
+				await interaction.reply(`✅ Successfully saved ${period} reminder time and updated schedules!`)
 			} catch (err) {
-				await interaction.reply("Error saving reminder time")
+				console.error("Error saving reminder time:", err);
+				await interaction.reply("❌ Error saving reminder time")
 			}
 		}
         // Handle slash commands
